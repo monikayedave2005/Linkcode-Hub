@@ -125,7 +125,8 @@ frontend/
 [Vaishnavi Chavan] (Full Stack Developer)
 
 
-📄 License
+📄 License : 
+
 This project is licensed under the MIT License.
 
 Developed with ❤️ for the Linkcode Community.
