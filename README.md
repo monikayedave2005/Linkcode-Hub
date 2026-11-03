@@ -83,24 +83,26 @@ Make sure you have Node.js installed on your machine.
 ### Installation
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/monikayedave2005/Linkcode-Hub.git
-Navigate to the frontend folder:
+```bash
+git clone https://github.com/monikayedave2005/Linkcode-Hub.git
+```
+2. Navigate to the frontend folder:
+ ```bash
+   cd Linkcode-Hub/frontend
+ ```
+3. Install dependencies:
+```bash
+   npm install
+```
+4. Start the development server:
 
-bash
-cd Linkcode-Hub/frontend
-Install dependencies:
-
-bash
-npm install
-Start the development server:
-
-bash
-npm run dev
-Open your browser and visit http://localhost:5173.
+```bash
+   npm run dev
+```
+5.  Open your browser and visit http://localhost:5173.
 
 📂 Folder Structure
-text
+
 frontend/
 ├── public/              # Static assets (logos, images)
 ├── src/
@@ -108,20 +110,20 @@ frontend/
 │   │   ├── About.tsx
 │   │   ├── AlumniDashboard.tsx
 │   │   ├── App.tsx
-│   │   ├── ...
+│   │   └── ...
 │   ├── assets/          # Global styles & assets
 │   ├── index.css        # Tailwind setup
 │   └── main.tsx         # Entry point
 ├── package.json
 ├── vite.config.ts
 └── README.md
-🤝 Contributors
-[Monika Yedave] (Project Lead & Full Stack Developer)
 
-[Vaishnavi Chavan] (Frontend Developer)
+🤝 Contributors
+[Monika Yedave] (Full Stack Developer)
+
+[Vaishnavi Chavan] (Full Stack Developer)
 
 📄 License
 This project is licensed under the MIT License.
 
 Developed with ❤️ for the Linkcode Community.
-   
