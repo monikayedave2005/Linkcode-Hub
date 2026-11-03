@@ -102,7 +102,7 @@ git clone https://github.com/monikayedave2005/Linkcode-Hub.git
 5.  Open your browser and visit http://localhost:5173.
 
 📂 Folder Structure
-
+```
 frontend/
 ├── public/              # Static assets (logos, images)
 ├── src/
@@ -117,11 +117,13 @@ frontend/
 ├── package.json
 ├── vite.config.ts
 └── README.md
+```
+🤝 Contributors :
 
-🤝 Contributors
 [Monika Yedave] (Full Stack Developer)
 
 [Vaishnavi Chavan] (Full Stack Developer)
+
 
 📄 License
 This project is licensed under the MIT License.
