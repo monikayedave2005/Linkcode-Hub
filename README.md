@@ -1,75 +1,127 @@
-# React + TypeScript + Vite
+# Linkcode Hub 🎓
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Real Experiences. Stronger Together.**
 
-Currently, two official plugins are available:
+Linkcode Hub is a comprehensive, student-driven placement experience and mentorship platform developed exclusively for the students, alumni, and faculty of **Linkcode Technologies, Pune**. 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The platform acts as a digital bridge between current students and verified alumni, facilitating career guidance, interview preparation, and knowledge sharing.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📌 Project Overview
 
-## Expanding the ESLint configuration
+Placement preparation often relies on scattered information shared through informal channels like WhatsApp groups or verbal communication. Linkcode Hub centralizes this knowledge. It allows students to:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Read real interview experiences shared by alumni.
+- Filter experiences by **Company, Role, Batch, and Difficulty**.
+- Request 1-on-1 mentorship from verified alumni.
+- Upload resumes for professional review.
+- Ask career-related questions in a dedicated Q&A forum.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🎯 Objectives
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- To develop a dedicated placement portal for Linkcode students.
+- To preserve interview knowledge for future batches.
+- To connect students with verified alumni for direct mentorship.
+- To provide a platform for resume reviews and career guidance.
+- To reduce the information gap between juniors, seniors, and alumni.
 
-```
+---
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## ✨ Key Features
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 👤 User Authentication
+- Student & Alumni Registration/Login.
+- Role-based access (Student / Alumni).
+- Secure authentication (JWT ready).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🎓 Student Features
+- Explore and filter real placement experiences.
+- View company-wise interview rounds and questions.
+- Request mentorship from alumni.
+- Upload resumes and receive feedback.
+- Ask questions on the Q&A Forum.
 
-```
+### 💼 Alumni (Mentor) Features
+- Share detailed interview experiences (Company, Role, CTC, Rounds, Questions).
+- Review student resumes and provide constructive feedback.
+- Accept or decline mentorship requests.
+- Answer student queries on the Q&A Forum.
+
+### 🔔 General Features
+- Real-time Notifications (Mentorship requests, resume reviews).
+- Student Insights Dashboard (Analytics on top recruiters, rounds, etc.).
+- Responsive, modern UI built with Tailwind CSS (Navy + Gold theme).
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- React.js (Vite)
+- TypeScript
+- Tailwind CSS
+- Lucide React (Icons)
+
+**Backend (Planned / In Progress):**
+- Python (Django)
+- Django REST Framework (DRF)
+- SQLite / PostgreSQL
+- JWT Authentication
+
+---
+
+## 🚀 Getting Started
+
+Follow these steps to set up the project locally:
+
+### Prerequisites
+Make sure you have Node.js installed on your machine.
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/monikayedave2005/Linkcode-Hub.git
+Navigate to the frontend folder:
+
+bash
+cd Linkcode-Hub/frontend
+Install dependencies:
+
+bash
+npm install
+Start the development server:
+
+bash
+npm run dev
+Open your browser and visit http://localhost:5173.
+
+📂 Folder Structure
+text
+frontend/
+├── public/              # Static assets (logos, images)
+├── src/
+│   ├── components/      # All React components (Pages & UI)
+│   │   ├── About.tsx
+│   │   ├── AlumniDashboard.tsx
+│   │   ├── App.tsx
+│   │   ├── ...
+│   ├── assets/          # Global styles & assets
+│   ├── index.css        # Tailwind setup
+│   └── main.tsx         # Entry point
+├── package.json
+├── vite.config.ts
+└── README.md
+🤝 Contributors
+[Monika Yedave] (Project Lead & Full Stack Developer)
+
+[Vaishnavi Chavan] (Frontend Developer)
+
+📄 License
+This project is licensed under the MIT License.
+
+Developed with ❤️ for the Linkcode Community.
+   
