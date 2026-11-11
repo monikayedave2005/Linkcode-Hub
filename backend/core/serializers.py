@@ -19,10 +19,17 @@ class RegisterSerializer(serializers.ModelSerializer):
             company=validated_data.get('company', ''),
             designation=validated_data.get('designation', '')
         )
-        # Auto-verify students, keep alumni pending
         if user.role == 'alumni':
             user.verification_status = 'pending'
         else:
             user.verification_status = 'verified'
         user.save()
         return user
+
+
+# ✅ ADD THIS NEW SERIALIZER
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'role', 'course', 'batch', 'company', 'designation', 'verification_status']
+        read_only_fields = ['id', 'verification_status']

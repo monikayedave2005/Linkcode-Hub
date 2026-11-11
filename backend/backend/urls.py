@@ -17,9 +17,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from api.views import test_api
+from rest_framework.routers import DefaultRouter
+from experiences.views import ExperienceViewSet
+from mentorship.views import MentorshipRequestViewSet
+
+
+# Create a router to handle /api/experiences/ automatically
+router = DefaultRouter()
+router.register(r'experiences', ExperienceViewSet)
+router.register(r'mentorship', MentorshipRequestViewSet, basename='mentorship')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
      path('api/test/', test_api, name='test_api'),
      path('api/auth/', include('core.urls')), # Connects your auth API
+     path('api/', include(router.urls)), # <-- Add this line
 ]
