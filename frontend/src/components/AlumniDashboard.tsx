@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, FileText, MessageSquare, Award, Upload, CheckCircle2, MessageCircle, Mail } from "lucide-react";
+import { Users, FileText, MessageSquare, Award, Upload, MessageCircle, Mail } from "lucide-react";
 
 interface AlumniDashboardProps {
     onNavigate: (page: any) => void;

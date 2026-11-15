@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MessageCircle, Mail, ArrowLeft, Users } from "lucide-react";
+import { MessageCircle, Mail, ArrowLeft, } from "lucide-react";
 
 interface MessagesProps {
     onBack: () => void;
