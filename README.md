@@ -2,18 +2,55 @@
 
 **A Full-Stack Alumni Mentorship & Placement Experience Sharing Platform**
 
-Linkcode Hub is a centralized, student-driven web platform designed to bridge the gap between current students and verified alumni. By facilitating transparent interview experience sharing, 1-on-1 mentorship, resume reviews, and Q&A forums, it equips students with the real-world insights needed to succeed in campus placements.
+Linkcode Hub is a centralized, student-driven web platform designed to bridge the gap between current students and verified alumni. By facilitating transparent interview experience sharing, 1-on-1 mentorship with real-time chat, resume reviews, and Q&A forums, it equips students with the real-world insights needed to succeed in campus placements.
 
 ---
 
 ## ✨ Features
 
 - **Role-Based Access Control (RBAC):** Distinct dashboards and permissions for Students, Alumni, and Admins.
-- **Secure Authentication:** JWT (JSON Web Tokens) based login and registration system.
+- **Secure Authentication:** JWT (JSON Web Tokens) based login and registration system with password update capabilities.
 - **Placement Experiences:** Verified alumni can share detailed interview rounds, questions, and preparation tips.
-- **Mentorship System:** Students can request 1-on-1 mentorship from specific alumni. Alumni can accept or decline requests.
+- **Mentorship System:** Students can request 1-on-1 mentorship. Alumni can accept, decline, and manage active mentees.
+- **Real-Time Chat:** Accepted mentors and mentees can communicate directly via an in-app chat system.
+- **Resume Review:** Students can upload PDF resumes, and Alumni can provide written feedback directly on the platform.
+- **Q&A Forum:** A community-driven space where students ask questions and alumni provide answers.
+- **Alumni Rewards System:** Alumni earn points for their contributions (sharing experiences, reviewing resumes, answering questions) with a dedicated Rewards Dashboard.
 - **Admin Verification:** Admins have a dedicated dashboard to verify alumni credentials before granting them platform access.
 - **Modern UI/UX:** A highly responsive, premium user interface built with React and Tailwind CSS.
+
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- React.js (Vite)
+- TypeScript
+- Tailwind CSS
+- Lucide React (Icons)
+
+**Backend:**
+- Python & Django
+- Django REST Framework (DRF)
+- SimpleJWT (Authentication)
+- SQLite (Development Database) / PostgreSQL (Production)
+
+---
+
+## 🚀 Getting Started (Local Setup)
+
+Follow these steps to run the project locally on your machine.
+
+### Prerequisites
+- Node.js (v18+)
+- Python (3.10+)
+- Git
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/monikayedave2005/Linkcode-Hub.git
+cd Linkcode-Hub
 
 ---
 
@@ -136,7 +173,7 @@ Linkcode-Hub/
 
 ## 👥 Contributors
 
-- **Monika Yedave** – Frontend Development & UI/UX (GitHub: [@monikayedave2005](https://github.com/monikayedave2005))
-- **Vaishnavi Chavan** – Backend Development & API Integration (GitHub: [@VaishnaviChavan28](https://github.com/VaishnaviChavan28))
+- **Monika Yedave** –(GitHub: [@monikayedave2005](https://github.com/monikayedave2005))
+- **Vaishnavi Chavan** – (GitHub: [@VaishnaviChavan28](https://github.com/VaishnaviChavan28))
 
 *Developed as a capstone project for the Django Batch.*
