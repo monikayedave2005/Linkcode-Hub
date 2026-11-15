@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Target, Zap, ArrowLeft, CheckCircle2, Gift, Award } from "lucide-react";
 
 interface RewardsProps {
@@ -5,12 +6,35 @@ interface RewardsProps {
 }
 
 export default function Rewards({ onBack }: RewardsProps) {
-    // ✅ Mock Data for Points and Progress
-    const currentPoints = 120;
-    const nextMilestone = 200;
-    const progressPercentage = (currentPoints / nextMilestone) * 100;
+    const [currentPoints, setCurrentPoints] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // ✅ Mock Data for Points History
+    // ✅ Fetch real points from Django
+    useEffect(() => {
+        const fetchPoints = async () => {
+            const token = localStorage.getItem('access_token');
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/auth/me/', {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setCurrentPoints(data.points || 0);
+                }
+            } catch (error) {
+                console.error("Failed to fetch points", error);
+            }
+            setIsLoading(false);
+        };
+        fetchPoints();
+    }, []);
+
+    const nextMilestone = 200;
+    // ✅ Calculate progress dynamically (safely, so it doesn't go over 100%)
+    const progressPercentage = Math.min((currentPoints / nextMilestone) * 100, 100);
+
+    // ✅ Mock Data for Points History (You can keep this for now, or fetch from DB later)
     const pointsHistory = [
         { id: 1, action: "Shared TCS Interview Experience", points: "+50", date: "2 days ago", type: "add" },
         { id: 2, action: "Answered Q&A: How to prepare for Infosys?", points: "+10", date: "4 days ago", type: "add" },
@@ -56,6 +80,7 @@ export default function Rewards({ onBack }: RewardsProps) {
                             <div className="flex justify-between items-end mb-3">
                                 <div>
                                     <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Current Score</p>
+                                    {/* ✅ Display the live points */}
                                     <p className="text-4xl font-black text-white">{currentPoints} <span className="text-lg text-[#c9a227]">pts</span></p>
                                 </div>
                                 <div className="text-right">
@@ -66,14 +91,14 @@ export default function Rewards({ onBack }: RewardsProps) {
 
                             <div className="w-full bg-[#0a1a30] h-4 rounded-full overflow-hidden border border-[#3a6199] shadow-inner mb-3">
                                 <div
-                                    className="h-full bg-gradient-to-r from-[#c9a227] to-[#e8c75d] rounded-full relative"
+                                    className="h-full bg-gradient-to-r from-[#c9a227] to-[#e8c75d] rounded-full relative transition-all duration-1000 ease-out"
                                     style={{ width: `${progressPercentage}%` }}
                                 >
                                     <div className="absolute top-0 right-0 bottom-0 w-4 bg-white/20 blur-sm"></div>
                                 </div>
                             </div>
                             <p className="text-sm text-slate-300 text-center font-medium">
-                                You are <strong className="text-[#c9a227]">{nextMilestone - currentPoints} points</strong> away from a <strong className="text-white">₹500 Amazon Voucher!</strong>
+                                You are <strong className="text-[#c9a227]">{nextMilestone - currentPoints > 0 ? nextMilestone - currentPoints : 0} points</strong> away from a <strong className="text-white">₹500 Amazon Voucher!</strong>
                             </p>
                         </div>
                     </div>

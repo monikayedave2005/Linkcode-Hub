@@ -38,6 +38,8 @@ export default function AlumniLogin({ onSuccess, onBack, onNavigateToRegister }:
             if (response.ok) {
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('refresh_token', data.refresh);
+                localStorage.setItem('email', formData.email);
+                localStorage.setItem('name', formData.email.split('@')[0]);
 
                 setIsLoading(false);
                 const derivedName = formData.email.split('@')[0];

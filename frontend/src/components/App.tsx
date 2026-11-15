@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Bell, Heart, User, Settings, LogOut, Info, LayoutDashboard, CheckCircle2, Clock, UserPlus, Trophy } from "lucide-react";
+import { Search, Bell, Heart, User, Settings, LogOut, Info, CheckCircle2, UserPlus, Trophy, MessageCircle } from "lucide-react";
 
-// ✅ Import all page components
 import LandingPage from "./LandingPage";
 import RegisterPortal from "./RegisterPortal";
 import StudentLogin from "./StudentLogin";
@@ -18,12 +17,16 @@ import AskShare from "./AskShare";
 import Insights from "./Insights";
 import About from "./About";
 import QandA from "./QandA";
+import Profile from "./Profile";
+import Chat from "./Chat";
+import Messages from "./Messages";
+import Setting from "./Setting";
 
 type PageType =
   | 'landing' | 'register-portal' | 'student-login' | 'alumni-login' | 'alumni-dashboard'
   | 'share-experience' | 'review-resumes' | 'rewards' | 'admin-dashboard'
   | 'home' | 'experiences' | 'companies' | 'askshare' | 'about' | 'insights'
-  | 'my-experiences' | 'settings' | 'q-and-a';
+  | 'my-experiences' | 'settings' | 'q-and-a' | 'profile' | 'chat' | 'messages' | 'setting';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageType>("landing");
@@ -38,18 +41,14 @@ export default function App() {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  // ✅ Chat State
+  const [chatContactId, setChatContactId] = useState<string>("");
+  const [chatContactName, setChatContactName] = useState<string>("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
-
-  const notifications = user.role === 'alumni' ? [
-    { id: 1, title: "New Mentorship Request", desc: "Rahul M. wants you to be his mentor.", time: "2 hours ago", type: "request" },
-    { id: 2, title: "Resume Review Pending", desc: "Priya S. uploaded her resume for review.", time: "5 hours ago", type: "resume" },
-    { id: 3, title: "Experience Approved", desc: "Your TCS experience was approved by Admin.", time: "1 day ago", type: "approved" },
-  ] : [
-    { id: 1, title: "Resume Reviewed!", desc: "Your resume was reviewed by an alumni.", time: "1 hour ago", type: "approved" },
-    { id: 2, title: "New Company Added", desc: "Persistent Systems added a new interview experience.", time: "3 hours ago", type: "info" },
-  ];
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -63,6 +62,25 @@ export default function App() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchNotifications = async () => {
+      const token = localStorage.getItem('access_token');
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/notifications/', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setNotifications(data);
+        }
+      } catch (error) {
+        console.error("Failed to load notifications", error);
+      }
+    };
+    fetchNotifications();
+  }, [isAuthenticated, currentPage]);
 
   const getInitials = (name: string) => {
     if (!name || name === "Student") return "ST";
@@ -86,13 +104,15 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token'); // ✅ Clear token on logout
+    localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('name');
     setIsAuthenticated(false);
     setCurrentPage("landing");
     setIsDropdownOpen(false);
     setIsNotifOpen(false);
     setUser({ name: "Student", email: "student@linkcode.edu.in", role: "student" });
+    setNotifications([]);
   };
 
   const handleExperienceShared = () => {
@@ -103,18 +123,20 @@ export default function App() {
     }, 2500);
   };
 
+  const handleStartChat = (id: string, name: string) => {
+    setChatContactId(id);
+    setChatContactName(name);
+    setCurrentPage("chat");
+  };
+
   const renderPage = () => {
     if (!isAuthenticated) {
       switch (currentPage) {
-        case "landing":
-          return <LandingPage onNavigate={setCurrentPage} />;
-
+        case "landing": return <LandingPage onNavigate={setCurrentPage} />;
         case "admin-dashboard":
-          // ✅ Direct Admin Access from Landing Page (Temporary bypass for testing)
           setUser({ name: "Admin", email: "admin@linkcode.edu.in", role: "admin" });
           setIsAuthenticated(true);
           return <AdminDashboard />;
-
         case "register-portal":
           return (
             <RegisterPortal
@@ -127,67 +149,38 @@ export default function App() {
               onNavigateToLogin={(role) => setCurrentPage(role === 'alumni' ? 'alumni-login' : 'student-login')}
             />
           );
-        case "student-login":
-          return <StudentLogin onSuccess={handleStudentLoginSuccess} onBack={() => setCurrentPage("landing")} onNavigateToRegister={() => setCurrentPage("register-portal")} />;
-        case "alumni-login":
-          return <AlumniLogin onSuccess={handleAlumniLoginSuccess} onBack={() => setCurrentPage("landing")} onNavigateToRegister={() => setCurrentPage("register-portal")} />;
-        default:
-          return <LandingPage onNavigate={setCurrentPage} />;
+        case "student-login": return <StudentLogin onSuccess={handleStudentLoginSuccess} onBack={() => setCurrentPage("landing")} onNavigateToRegister={() => setCurrentPage("register-portal")} />;
+        case "alumni-login": return <AlumniLogin onSuccess={handleAlumniLoginSuccess} onBack={() => setCurrentPage("landing")} onNavigateToRegister={() => setCurrentPage("register-portal")} />;
+        default: return <LandingPage onNavigate={setCurrentPage} />;
       }
     }
 
-    // ✅ ROLE-BASED SECURITY GUARDS
     const isAlumni = user.role === 'alumni';
     const isAdmin = user.role === 'admin';
 
     switch (currentPage) {
-      // 🔒 PROTECTED ALUMNI ROUTES
-      case "alumni-dashboard":
-        return isAlumni ? <AlumniDashboard onNavigate={setCurrentPage} /> : <Home onNavigate={setCurrentPage} />;
-
-      case "share-experience":
-        return isAlumni ? <ShareExperience onSuccess={handleExperienceShared} onBack={() => setCurrentPage("alumni-dashboard")} /> : <Home onNavigate={setCurrentPage} />;
-
-      case "review-resumes":
-        return isAlumni ? <ReviewResumes onBack={() => setCurrentPage("alumni-dashboard")} /> : <Home onNavigate={setCurrentPage} />;
-
-      case "rewards":
-        return isAlumni ? <Rewards onBack={() => setCurrentPage("alumni-dashboard")} /> : <Home onNavigate={setCurrentPage} />;
-
-      // 🔒 PROTECTED ADMIN ROUTES
-      case "admin-dashboard":
-        return isAdmin ? <AdminDashboard /> : <Home onNavigate={setCurrentPage} />;
-
-      // 🌍 PUBLIC ROUTES (Available to both)
-      case "home":
-        return <Home onNavigate={setCurrentPage} />;
-      case "experiences":
-        return <Experiences />;
-      case "companies":
-        return <Companies />;
-      case "askshare":
-        return <AskShare />;
-      case "insights":
-        return <Insights />;
-      case "about":
-        return <About />;
-      case "q-and-a":
-        return <QandA />;
-
-      // 🚧 PLACEHOLDERS
-      case "my-experiences":
-        return <div className="min-h-[60vh] flex items-center justify-center text-slate-500 font-bold text-2xl">My Experiences Page Coming Soon</div>;
-      case "settings":
-        return <div className="min-h-[60vh] flex items-center justify-center text-slate-500 font-bold text-2xl">Settings Page Coming Soon</div>;
-      default:
-        return <Home onNavigate={setCurrentPage} />;
+      case "alumni-dashboard": return isAlumni ? <AlumniDashboard onNavigate={setCurrentPage} onStartChat={handleStartChat} /> : <Home onNavigate={setCurrentPage} />;
+      case "share-experience": return isAlumni ? <ShareExperience onSuccess={handleExperienceShared} onBack={() => setCurrentPage("alumni-dashboard")} /> : <Home onNavigate={setCurrentPage} />;
+      case "review-resumes": return isAlumni ? <ReviewResumes onBack={() => setCurrentPage("alumni-dashboard")} /> : <Home onNavigate={setCurrentPage} />;
+      case "rewards": return isAlumni ? <Rewards onBack={() => setCurrentPage("alumni-dashboard")} /> : <Home onNavigate={setCurrentPage} />;
+      case "admin-dashboard": return isAdmin ? <AdminDashboard /> : <Home onNavigate={setCurrentPage} />;
+      case "home": return <Home onNavigate={setCurrentPage} />;
+      case "experiences": return <Experiences />;
+      case "companies": return <Companies onNavigate={setCurrentPage} />;
+      case "askshare": return <AskShare />;
+      case "insights": return <Insights />;
+      case "about": return <About />;
+      case "q-and-a": return <QandA />;
+      case "profile": return <Profile onBack={() => setCurrentPage(user.role === 'alumni' ? 'alumni-dashboard' : 'home')} />;
+      case "chat": return <Chat onBack={() => setCurrentPage(user.role === 'alumni' ? 'alumni-dashboard' : 'home')} contactId={chatContactId} contactName={chatContactName} />;
+      case "messages": return <Messages onBack={() => setCurrentPage(user.role === 'alumni' ? 'alumni-dashboard' : 'home')} onStartChat={handleStartChat} userRole={user.role} />
+      case "setting": return <Setting onBack={() => setCurrentPage(user.role === 'alumni' ? 'alumni-dashboard' : 'home')} />;
+      default: return <Home onNavigate={setCurrentPage} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
-
-      {/* ✅ NAVBAR */}
       {isAuthenticated && (
         <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -204,7 +197,6 @@ export default function App() {
                 {user.role === 'alumni' ? (
                   <>
                     <button onClick={() => setCurrentPage("alumni-dashboard")} className={`text-sm font-bold pb-1 border-b-2 transition-all ${currentPage === "alumni-dashboard" ? "text-[#0f2747] border-[#c9a227]" : "text-slate-500 border-transparent hover:text-[#0f2747]"}`}>Dashboard</button>
-                    <button onClick={() => setCurrentPage("experiences")} className={`text-sm font-bold pb-1 border-b-2 transition-all ${currentPage === "experiences" ? "text-[#0f2747] border-[#c9a227]" : "text-slate-500 border-transparent hover:text-[#0f2747]"}`}>Experiences</button>
                     <button onClick={() => setCurrentPage("q-and-a")} className={`text-sm font-bold pb-1 border-b-2 transition-all ${currentPage === "q-and-a" ? "text-[#0f2747] border-[#c9a227]" : "text-slate-500 border-transparent hover:text-[#0f2747]"}`}>Q&A Forum</button>
                     <button onClick={() => setCurrentPage("about")} className={`text-sm font-bold pb-1 border-b-2 transition-all ${currentPage === "about" ? "text-[#0f2747] border-[#c9a227]" : "text-slate-500 border-transparent hover:text-[#0f2747]"}`}>About</button>
                   </>
@@ -227,28 +219,31 @@ export default function App() {
               <div className="relative" ref={notifRef}>
                 <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="p-2 hover:bg-slate-100 rounded-full relative">
                   <Bell className="w-5 h-5 text-slate-600" />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
+                  {notifications.length > 0 && (<span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>)}
                 </button>
 
                 {isNotifOpen && (
                   <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden z-50">
                     <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                       <h3 className="font-bold text-[#0f2747] text-sm">Notifications</h3>
-                      <span className="text-[10px] font-bold text-[#c9a227] cursor-pointer hover:underline">Mark all as read</span>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
-                      {notifications.map((notif) => (
-                        <div key={notif.id} className="p-4 border-b border-slate-50 hover:bg-slate-50 transition cursor-pointer flex gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'request' ? 'bg-blue-100 text-blue-600' : notif.type === 'resume' ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                            {notif.type === 'request' ? <UserPlus className="w-4 h-4" /> : notif.type === 'resume' ? <Clock className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                      {notifications.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-slate-500 font-bold">No new notifications.</div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div key={notif.id} className="p-4 border-b border-slate-50 hover:bg-slate-50 transition cursor-pointer flex gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'request' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                              {notif.type === 'request' ? <UserPlus className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-[#0f2747] leading-tight mb-0.5">{notif.title}</p>
+                              <p className="text-xs text-slate-500 mb-1">{notif.desc}</p>
+                              <p className="text-[10px] font-semibold text-slate-400">{notif.time}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-[#0f2747] leading-tight mb-0.5">{notif.title}</p>
-                            <p className="text-xs text-slate-500 mb-1">{notif.desc}</p>
-                            <p className="text-[10px] font-semibold text-slate-400">{notif.time}</p>
-                          </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
@@ -264,28 +259,33 @@ export default function App() {
                     <div className="p-5 border-b border-slate-100 bg-slate-50/50">
                       <h3 className="font-bold text-[#0f2747] text-sm truncate uppercase">{user.name}</h3>
                       <p className="text-xs text-slate-500 truncate mt-1">{user.email}</p>
-                      <span className="inline-block mt-2 bg-[#c9a227]/20 text-[#997a1a] text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
-                        {user.role}
-                      </span>
+                      <span className="inline-block mt-2 bg-[#c9a227]/20 text-[#997a1a] text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">{user.role}</span>
                     </div>
 
                     <div className="p-2">
-                      <button onClick={() => { setCurrentPage(user.role === 'alumni' ? 'alumni-dashboard' : user.role === 'admin' ? 'admin-dashboard' : 'my-experiences'); setIsDropdownOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-[#0f2747] rounded-xl transition font-medium">
-                        {user.role === 'alumni' ? <LayoutDashboard className="w-4 h-4 text-slate-400" /> : user.role === 'admin' ? <LayoutDashboard className="w-4 h-4 text-slate-400" /> : <User className="w-4 h-4 text-slate-400" />}
-                        {user.role === 'alumni' ? 'Alumni Dashboard' : user.role === 'admin' ? 'Admin Panel' : 'My Experiences'}
+
+                      <button onClick={() => { setCurrentPage('messages'); setIsDropdownOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-[#0f2747] rounded-xl transition font-medium mb-1">
+                        <MessageCircle className="w-4 h-4 text-[#c9a227]" /> My Chats
                       </button>
+
+
+                      <button onClick={() => { setCurrentPage('profile'); setIsDropdownOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-[#0f2747] rounded-xl transition font-medium">
+                        <User className="w-4 h-4 text-slate-400" /> My Profile
+                      </button>
+
+
 
                       {user.role === 'alumni' && (
                         <button onClick={() => { setCurrentPage('rewards'); setIsDropdownOpen(false); }} className="w-full flex items-center justify-between px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-[#0f2747] rounded-xl transition font-medium mt-1">
-                          <div className="flex items-center gap-3">
-                            <Trophy className="w-4 h-4 text-[#c9a227]" /> My Rewards
-                          </div>
+                          <div className="flex items-center gap-3"><Trophy className="w-4 h-4 text-[#c9a227]" /> My Rewards</div>
                           <span className="bg-[#c9a227]/20 text-[#997a1a] text-[10px] font-bold px-2 py-0.5 rounded-md">120 pts</span>
                         </button>
                       )}
 
                       <button onClick={() => { setCurrentPage('about'); setIsDropdownOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-[#0f2747] rounded-xl transition font-medium mt-1"><Info className="w-4 h-4 text-slate-400" /> About Linkcode Hub</button>
-                      <button onClick={() => { setCurrentPage('settings'); setIsDropdownOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-[#0f2747] rounded-xl transition font-medium"><Settings className="w-4 h-4 text-slate-400" /> Settings</button>
+                      <button onClick={() => { setCurrentPage('setting'); setIsDropdownOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-[#0f2747] rounded-xl transition font-medium">
+                        <Settings className="w-4 h-4 text-slate-400" /> Settings
+                      </button>
                     </div>
 
                     <div className="p-2 border-t border-slate-100">
@@ -303,6 +303,7 @@ export default function App() {
         {renderPage()}
       </div>
 
+      {/* ✅ RESTORED FOOTER */}
       {isAuthenticated && user.role !== 'admin' && (
         <footer className="bg-[#0f2747] pt-12 pb-8 border-t border-[#1e3a5f]">
           <div className="max-w-7xl mx-auto px-6">
@@ -376,7 +377,6 @@ export default function App() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

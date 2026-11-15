@@ -1,36 +1,28 @@
-"""
-URL configuration for backend project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path,include
-from api.views import test_api
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from experiences.views import ExperienceViewSet
-from mentorship.views import MentorshipRequestViewSet
+from mentorship.views import MentorshipRequestViewSet, QAPostViewSet, ResumeReviewViewSet,get_notifications, MessageViewSet
+# ✅ Import settings and static
+from django.conf import settings
+from django.conf.urls.static import static
+from mentorship.views import get_alumni_stats
 
-
-# Create a router to handle /api/experiences/ automatically
 router = DefaultRouter()
 router.register(r'experiences', ExperienceViewSet)
 router.register(r'mentorship', MentorshipRequestViewSet, basename='mentorship')
-
+router.register(r'qa', QAPostViewSet, basename='qa')
+router.register(r'resumes', ResumeReviewViewSet, basename='resumes')
+router.register(r'messages', MessageViewSet, basename='messages')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-     path('api/test/', test_api, name='test_api'),
-     path('api/auth/', include('core.urls')), # Connects your auth API
-     path('api/', include(router.urls)), # <-- Add this line
+    path('api/auth/', include('core.urls')), 
+    path('api/', include(router.urls)),
+    path('api/notifications/', get_notifications, name='notifications'), 
+    path('api/alumni-stats/', get_alumni_stats, name='alumni-stats'),
 ]
+
+# ✅ Tell Django to serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

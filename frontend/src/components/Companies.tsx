@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Search, MapPin, ChevronRight, CheckCircle2 } from "lucide-react";
 
+// ✅ 1. Add the onNavigate prop interface
+interface CompaniesProps {
+    onNavigate: (page: any) => void;
+}
+
 const companiesData = [
     { id: 1, name: "Tata Consultancy Services (TCS)", shortName: "TCS", logo: "/logos/tcs.png", type: "IT Services", location: "Pune / Pan India", desc: "Global leader in IT services, consulting, and business solutions with regular campus drives.", package: "3.36 - 7.0 LPA", logs: "42 Shared", tags: ["Aptitude", "DSA", "OOP", "HR", "SQL"], brandColor: "bg-[#0f2747]", initial: "T" },
     { id: 2, name: "Infosys", shortName: "Infosys", logo: "/logos/infosys.png", type: "IT Services", location: "Pune / Bangalore", desc: "Offers next-generation digital services hiring across System Engineer (SE) and Specialist Programmer (SP).", package: "3.6 - 9.5 LPA", logs: "38 Shared", tags: ["DBMS", "OS", "Java", "CN", "HackWithInfy"], brandColor: "bg-[#007cc2]", initial: "I" },
@@ -10,7 +15,8 @@ const companiesData = [
     { id: 6, name: "Wipro", shortName: "Wipro", logo: "/logos/wipro.png", type: "IT Services", location: "Pune / Bangalore", desc: "Wipro Elite NTH drives recruit engineering graduates for Project Engineer roles across domains.", package: "3.5 - 6.5 LPA", logs: "22 Shared", tags: ["Aptitude", "Coding", "Java", "HR"], brandColor: "bg-[#341f97]", initial: "W" }
 ];
 
-export default function Companies() {
+// ✅ 2. Accept onNavigate in the component
+export default function Companies({ onNavigate }: CompaniesProps) {
     const [searchTerm, setSearchTerm] = useState("");
 
     const filteredCompanies = companiesData.filter(c =>
@@ -90,8 +96,12 @@ export default function Companies() {
                                 </div>
                             </div>
 
-                            <button className="w-full bg-white hover:bg-[#c9a227] text-[#0f2747] hover:text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm border border-slate-200 hover:border-[#c9a227]">
-                                View Insights <ChevronRight className="w-4 h-4" />
+                            {/* ✅ 3. Updated Button to use onNavigate */}
+                            <button
+                                onClick={() => onNavigate('experiences')}
+                                className="w-full bg-white hover:bg-[#c9a227] text-[#0f2747] hover:text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm border border-slate-200 hover:border-[#c9a227]"
+                            >
+                                View Experiences <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
                     ))}

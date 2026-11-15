@@ -20,6 +20,7 @@ class User(AbstractUser):
     company = models.CharField(max_length=100, blank=True, null=True)
     designation = models.CharField(max_length=100, blank=True, null=True)
     verification_status = models.CharField(max_length=20, default='pending') 
+    points = models.IntegerField(default=0) 
 
     def __str__(self):
         return f"{self.username} - {self.role}"

@@ -2,14 +2,23 @@ from rest_framework import viewsets
 from .models import PlacementExperience
 from .serializers import ExperienceSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.exceptions import PermissionDenied
 
 class ExperienceViewSet(viewsets.ModelViewSet):
-    # Order by newest first
-    queryset = PlacementExperience.objects.all().order_by('-created_at')
+    # ✅ QUERY OPTIMIZATION: Fetch author data in the same query
+    queryset = PlacementExperience.objects.select_related('author').all().order_by('-created_at')
     serializer_class = ExperienceSerializer
-    # Anyone can read, but you must be logged in to create
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        # Automatically set the author to the logged-in user
-        serializer.save(author=self.request.user)
+        user = self.request.user
+        
+        # Security check
+        if user.role != 'alumni':
+            raise PermissionDenied("Only Alumni can share placement experiences.")
+        
+        # ✅ AWARD POINTS: Alumni gets 50 points for sharing an experience
+        user.points += 50
+        user.save()
+        
+        serializer.save(author=user)

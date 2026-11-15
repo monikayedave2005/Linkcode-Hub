@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Users, Award, HelpCircle, TrendingUp, MessageSquare, ArrowRight, Heart, Calendar, FileText } from 'lucide-react';
+import { Search, Users, Award, HelpCircle, TrendingUp, MessageSquare, ArrowRight, Heart, Calendar, FileText, Upload } from 'lucide-react';
 
 interface HomeProps {
     onNavigate: (page: 'home' | 'experiences' | 'companies' | 'askshare' | 'about' | 'insights') => void;
@@ -7,6 +7,8 @@ interface HomeProps {
 
 export default function Home({ onNavigate }: HomeProps) {
     const [recentExperiences, setRecentExperiences] = useState<any[]>([]);
+    // ✅ State for Resume Upload
+    const [resumeFile, setResumeFile] = useState<File | null>(null);
 
     // ✅ Fetch recent experiences from Django
     useEffect(() => {
@@ -14,7 +16,6 @@ export default function Home({ onNavigate }: HomeProps) {
             try {
                 const response = await fetch('http://127.0.0.1:8000/api/experiences/');
                 const data = await response.json();
-                // Take the top 3 for the home page
                 setRecentExperiences(data.slice(0, 3));
             } catch (error) {
                 console.error("Failed to fetch recent experiences", error);
@@ -22,6 +23,39 @@ export default function Home({ onNavigate }: HomeProps) {
         };
         fetchRecent();
     }, []);
+
+    // ✅ Handle Resume Upload
+    const handleResumeUpload = async () => {
+        if (!resumeFile) return alert("Please select a PDF file first.");
+
+        const token = localStorage.getItem('access_token');
+        if (!token) return alert("Please log in as a Student to upload a resume.");
+
+        const formData = new FormData();
+        formData.append('resume_file', resumeFile);
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/resumes/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                alert("Resume uploaded successfully! Alumni can now review it.");
+                setResumeFile(null);
+                const fileInput = document.getElementById('resume-upload') as HTMLInputElement;
+                if (fileInput) fileInput.value = "";
+            } else {
+                alert("Failed to upload. Make sure you are logged in as a Student.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Network error.");
+        }
+    };
 
     const popularCompanies = [
         { name: "tcs", logo: "/logos/tcs.png" },
@@ -160,7 +194,7 @@ export default function Home({ onNavigate }: HomeProps) {
                 </div>
             </section>
 
-            {/* ✅ 4. RECENT EXPERIENCES (Connected to Database) */}
+            {/* ✅ 4. RECENT EXPERIENCES */}
             <section className="bg-[#0a1a30] py-20 border-t border-[#1e3a5f]">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex justify-between items-end mb-8">
@@ -175,7 +209,6 @@ export default function Home({ onNavigate }: HomeProps) {
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-                        {/* Map through real experiences */}
                         {recentExperiences.map((exp) => (
                             <div key={exp.id} className="bg-[#17335c] border border-[#3a6199] rounded-2xl p-6 flex flex-col justify-between text-white">
                                 <div>
@@ -194,7 +227,6 @@ export default function Home({ onNavigate }: HomeProps) {
                                         <span className="flex items-center gap-1"><Award className="w-3 h-3" /> {exp.rounds}</span>
                                     </div>
                                     <div className="bg-[#0f2747] rounded-xl p-4 mb-4 border border-[#3a6199]/50">
-                                        {/* Truncate text to keep cards the same height */}
                                         <p className="text-sm italic text-slate-300 leading-relaxed line-clamp-3">"{exp.quote}"</p>
                                     </div>
                                 </div>
@@ -212,7 +244,6 @@ export default function Home({ onNavigate }: HomeProps) {
                             </div>
                         ))}
 
-                        {/* Side CTAs */}
                         <div className="flex flex-col gap-4">
                             <div className="bg-[#17335c] border border-[#c9a227] rounded-2xl p-6 flex-1 flex flex-col justify-between shadow-lg">
                                 <div>
@@ -244,7 +275,37 @@ export default function Home({ onNavigate }: HomeProps) {
                 </div>
             </section>
 
-            {/* ✅ 5. POPULAR COMPANIES */}
+            {/* ✅ 5. RESUME UPLOAD SECTION (Placed right before Popular Companies) */}
+            <section className="max-w-7xl mx-auto px-6 py-12 relative z-20">
+                <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#c9a227]/40 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0 text-[#c9a227]">
+                            <Upload className="w-7 h-7" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black text-[#0f2747]">Need your Resume Reviewed?</h3>
+                            <p className="text-sm text-slate-500">Upload your PDF and our verified Alumni will provide detailed feedback.</p>
+                        </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row w-full md:w-auto items-center gap-3">
+                        <input
+                            id="resume-upload"
+                            type="file"
+                            accept=".pdf"
+                            onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                            className="w-full sm:w-auto text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-[#0f2747] file:text-white hover:file:bg-[#1a3a63] cursor-pointer"
+                        />
+                        <button
+                            onClick={handleResumeUpload}
+                            className="w-full sm:w-auto bg-[#c9a227] hover:bg-[#b08d22] text-[#0f2747] font-black px-8 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(201,162,39,0.3)] whitespace-nowrap"
+                        >
+                            Upload Resume
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* ✅ 6. POPULAR COMPANIES */}
             <section className="bg-white py-20">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex justify-between items-end mb-10">

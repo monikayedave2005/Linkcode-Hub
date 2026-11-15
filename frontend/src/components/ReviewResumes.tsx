@@ -1,20 +1,65 @@
-import { useState } from "react";
-import { ArrowLeft, Search, FileText, X, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Search, FileText, X, CheckCircle2, Download } from "lucide-react";
 
 interface ReviewResumesProps {
     onBack: () => void;
 }
 
 export default function ReviewResumes({ onBack }: ReviewResumesProps) {
-    // ✅ Modal State
+    const [resumes, setResumes] = useState<any[]>([]);
     const [selectedResume, setSelectedResume] = useState<any>(null);
     const [feedback, setFeedback] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
-    const pendingResumes = [
-        { id: 1, name: "Priya Sharma", batch: "Batch 2026", role: "Software Developer", date: "2 hours ago" },
-        { id: 2, name: "Rahul More", batch: "Batch 2025", role: "Full Stack Developer", date: "5 hours ago" },
-        { id: 3, name: "Sneha Kulkarni", batch: "Batch 2026", role: "Data Analyst", date: "1 day ago" },
-    ];
+    // ✅ Fetch REAL resumes from Django
+    useEffect(() => {
+        const fetchResumes = async () => {
+            const token = localStorage.getItem('access_token');
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/resumes/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    // Only show pending ones
+                    setResumes(data.filter((r: any) => r.status === 'pending'));
+                }
+            } catch (error) {
+                console.error("Failed to fetch resumes", error);
+            }
+            setIsLoading(false);
+        };
+        fetchResumes();
+    }, []);
+
+    // ✅ Handle Feedback Submit
+    const handleSubmitFeedback = async () => {
+        if (!feedback) return alert("Please write feedback");
+        const token = localStorage.getItem('access_token');
+
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/resumes/${selectedResume.id}/submit_feedback/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ feedback: feedback })
+            });
+
+            if (response.ok) {
+                alert("Feedback submitted successfully!");
+                // Remove from UI
+                setResumes(resumes.filter(r => r.id !== selectedResume.id));
+                setSelectedResume(null);
+                setFeedback("");
+            } else {
+                alert("Failed to submit feedback.");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <div className="bg-slate-50 min-h-screen font-sans pb-20">
@@ -48,32 +93,43 @@ export default function ReviewResumes({ onBack }: ReviewResumesProps) {
                             <input type="text" placeholder="Search students..." className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg py-2 pl-9 pr-4 focus:outline-none focus:border-[#c9a227] text-sm" />
                         </div>
                     </div>
-                    <div className="divide-y divide-slate-100">
-                        {pendingResumes.map((resume) => (
-                            <div key={resume.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50 transition">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">{resume.name.charAt(0)}</div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-[#0f2747]">{resume.name}</h3>
-                                        <p className="text-xs text-slate-500 mt-1">{resume.batch} • Targeting: {resume.role}</p>
+
+                    {isLoading ? (
+                        <div className="p-10 text-center text-slate-500 font-bold">Loading...</div>
+                    ) : resumes.length === 0 ? (
+                        <div className="p-10 text-center text-slate-500 font-bold">No pending resumes right now.</div>
+                    ) : (
+                        <div className="divide-y divide-slate-100">
+                            {resumes.map((resume) => (
+                                <div key={resume.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50 transition">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                                            {resume.student_name ? resume.student_name.charAt(0).toUpperCase() : "S"}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-base font-bold text-[#0f2747]">{resume.student_name}</h3>
+                                            <p className="text-xs text-slate-500 mt-1">Uploaded: {new Date(resume.created_at).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                        <a href={resume.resume_file} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#c9a227] hover:underline flex items-center gap-1">
+                                            <Download className="w-4 h-4" /> View PDF
+                                        </a>
+                                        <button
+                                            onClick={() => setSelectedResume(resume)}
+                                            className="bg-[#0f2747] hover:bg-[#1a3a63] text-white px-6 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2"
+                                        >
+                                            <FileText className="w-4 h-4" /> Review Resume
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-6">
-                                    <span className="text-xs font-semibold text-slate-400">{resume.date}</span>
-                                    <button
-                                        onClick={() => setSelectedResume(resume)} // ✅ Modal उघडण्यासाठी
-                                        className="bg-[#0f2747] hover:bg-[#1a3a63] text-white px-6 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2"
-                                    >
-                                        <FileText className="w-4 h-4" /> Review Resume
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </main>
 
-            {/* ✅ Review Modal */}
+            {/* ✅ Real Feedback Modal */}
             {selectedResume && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
                     <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300 relative">
@@ -82,18 +138,7 @@ export default function ReviewResumes({ onBack }: ReviewResumesProps) {
                         </button>
 
                         <h2 className="text-2xl font-black text-[#0f2747] mb-1">Review Resume</h2>
-                        <p className="text-sm text-slate-500 mb-6">Providing feedback for <span className="font-bold text-[#0f2747]">{selectedResume.name}</span></p>
-
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <FileText className="w-8 h-8 text-blue-500" />
-                                <div>
-                                    <p className="text-sm font-bold text-[#0f2747]">Resume_{selectedResume.name.replace(' ', '_')}.pdf</p>
-                                    <p className="text-xs text-slate-500">1.2 MB • Uploaded {selectedResume.date}</p>
-                                </div>
-                            </div>
-                            <button className="text-xs font-bold text-[#0093E9] hover:underline">View PDF</button>
-                        </div>
+                        <p className="text-sm text-slate-500 mb-6">Providing feedback for <span className="font-bold text-[#0f2747]">{selectedResume.student_name}</span></p>
 
                         <label className="block text-xs font-bold text-slate-600 mb-2 uppercase tracking-wide">Your Feedback / Suggestions</label>
                         <textarea
@@ -105,11 +150,7 @@ export default function ReviewResumes({ onBack }: ReviewResumesProps) {
                         ></textarea>
 
                         <button
-                            onClick={() => {
-                                alert("Feedback submitted successfully!");
-                                setSelectedResume(null);
-                                setFeedback("");
-                            }}
+                            onClick={handleSubmitFeedback}
                             className="w-full bg-[#c9a227] hover:bg-[#b08d22] text-[#0f2747] font-black py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(201,162,39,0.3)] flex items-center justify-center gap-2"
                         >
                             <CheckCircle2 className="w-5 h-5" /> Submit Feedback
