@@ -171,9 +171,8 @@ Linkcode-Hub/
 
 ---
 
-## 👥 Contributors
+## 👥 Contributor
 
 - **Monika Yedave** –(GitHub: [@monikayedave2005](https://github.com/monikayedave2005))
-- **Vaishnavi Chavan** – (GitHub: [@VaishnaviChavan28](https://github.com/VaishnaviChavan28))
 
 *Developed as a capstone project for the Django Batch.*
